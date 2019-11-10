@@ -1,0 +1,33 @@
+Sobels excecution times with different opti option
+
+None:
+
+Opencv : 1154.81
+Naif : 16602
+Naif deroule : 13900.5
+Pointeurs : 4244.4
+Pointeurs deroule i : 2818.6
+Poiteur deroules i&j : 2256.92
+Multithread : 1884.14
+----------------------------------------------------------------------------------
+
+O1:
+
+Opencv : 1108.85
+Naif : 2656.42
+Naif deroule : 2396.3
+Pointeurs : 1252.17
+Pointeurs deroule i : 1247.31
+Poiteur deroules i&j : 1151.76
+Multithread : 643.703
+----------------------------------------------------------------------------------
+
+O2:
+
+Opencv : 1151.22
+Naif : 2329.98
+Naif deroule : 2157.14
+Pointeurs : 1263.71
+Pointeurs deroule i : 1191.1
+Poiteur deroules i&j : 1182.1
+Multithread : 704.654

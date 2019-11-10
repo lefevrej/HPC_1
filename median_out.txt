@@ -1,0 +1,13 @@
+Medians excecution times with different opti option
+
+O2:
+
+Naive:
+	k=0 -> 33915.7
+	k=1 -> 110525
+	k=2 -> 199515
+	k=3 -> 283574
+	k=4 -> 366113
+	k=5 -> 448019
+	k=6 -> 531080
+	k=7 -> 612836

@@ -69,7 +69,7 @@ void sobel0(Mat & frame, Mat & grad) {
  *--------------- Poiteurs déroulés en i et j ---------------
  *
  */
-void sobel1(Mat frame, Mat out) {
+void sobel5(Mat frame, Mat out) {
   int x, y;
   char a,
   x00, x01, x02, x03, x04,
@@ -183,7 +183,7 @@ void sobel1(Mat frame, Mat out) {
  *--------------- Poiteurs déroulés en i ---------------
  *
  */				
-void sobel5(Mat & frame, Mat & out) {
+void sobel4(Mat & frame, Mat & out) {
   int x, y;
   char a,
   x00, x01, x02,
@@ -251,7 +251,7 @@ void sobel5(Mat & frame, Mat & out) {
  *--------------- Naif ---------------
  *
  */					
-void sobel3(Mat & f, Mat & out) {
+void sobel1(Mat & f, Mat & out) {
   int a;
   for (int i = 1; i < f.rows - 1; i++) {
     for (int j = 1; j < f.cols - 1; j++) {
@@ -296,7 +296,7 @@ void sobel2(Mat & f, Mat & out) {
  *--------------- Poiteurs  ---------------
  *
  */					
-void sobel4(Mat & frame, Mat & out) {
+void sobel3(Mat & frame, Mat & out) {
   int x, y;
   char a,
   x00, x01, x02,
@@ -563,7 +563,7 @@ void sobel_task(Mat frame, Mat out, int start, int end) {
  *--------------- Threads ---------------
  *
  */
-void sobel_unroll(Mat &f, Mat &out) {
+void sobel_thread(Mat &f, Mat &out) {
   int n = thread::hardware_concurrency();
   thread* threads[n];
   int band_width = f.rows / n;
@@ -611,15 +611,11 @@ int main() {
   // variable contenant les paramètres des images ou d'éxécution
 
   unsigned char key = '0';
-
   #define PROFILE
-
   #ifdef PROFILE
   // profiling / instrumentation libraries
   #include <time.h>
-
   #include <sys/time.h>
-
   #endif
 
   //----------------------------------------------------
@@ -639,12 +635,13 @@ int main() {
   // boucle infinie pour traiter la séquence vidéo
   //
   double e, s;
-  double moyenneSobel[6];
+  double mean_sobel[7];
+  string labels[7] = {"Opencv : ", "Naif : ", "Naif deroule : ", "Pointeurs : ",
+   "Pointeurs deroule i : ", "Poiteur deroules i&j : ", "Multithread : "};
   int n_frames = 0;
 
   cap.read(frame);
   while (key != 'q' && n_frames < 24) {
-    n_frames++;
     //
     // acquisition d'une trame video - librairie OpenCV
     cap.read(frame);
@@ -657,70 +654,63 @@ int main() {
       sobel0(frame_gray, grad);
     }
     gettimeofday( & end, NULL);
-
     e = ((double) end.tv_sec * 1000000.0 + (double) end.tv_usec);
     s = ((double) start.tv_sec * 1000000.0 + (double) start.tv_usec);
-    moyenneSobel[0] = (moyenneSobel[0] * n_frames + (e - s) / 50) / (n_frames + 1);
+    mean_sobel[0] = (mean_sobel[0] * n_frames + (e - s) / 50) / (n_frames + 1);
 
     gettimeofday( & start, NULL);
     for (int i = 0; i < 50; ++i) {
       sobel1(frame_gray, grad);
     }
     gettimeofday( & end, NULL);
-
     e = ((double) end.tv_sec * 1000000.0 + (double) end.tv_usec);
     s = ((double) start.tv_sec * 1000000.0 + (double) start.tv_usec);
-    moyenneSobel[1] = (moyenneSobel[1] * n_frames + (e - s) / 50) / (n_frames + 1);
+    mean_sobel[1] = (mean_sobel[1] * n_frames + (e - s) / 50) / (n_frames + 1);
 
     gettimeofday( & start, NULL);
     for (int i = 0; i < 50; ++i) {
       sobel2(frame_gray, grad);
     }
     gettimeofday( & end, NULL);
-
     e = ((double) end.tv_sec * 1000000.0 + (double) end.tv_usec);
     s = ((double) start.tv_sec * 1000000.0 + (double) start.tv_usec);
-    moyenneSobel[2] = (moyenneSobel[2] * n_frames + (e - s) / 50) / (n_frames + 1);
+    mean_sobel[2] = (mean_sobel[2] * n_frames + (e - s) / 50) / (n_frames + 1);
 
     gettimeofday( & start, NULL);
     for (int i = 0; i < 50; ++i) {
       sobel3(frame_gray, grad);
     }
     gettimeofday( & end, NULL);
-
     e = ((double) end.tv_sec * 1000000.0 + (double) end.tv_usec);
     s = ((double) start.tv_sec * 1000000.0 + (double) start.tv_usec);
-    moyenneSobel[3] = (moyenneSobel[3] * n_frames + (e - s) / 50) / (n_frames + 1);
+    mean_sobel[3] = (mean_sobel[3] * n_frames + (e - s) / 50) / (n_frames + 1);
 
     gettimeofday( & start, NULL);
     for (int i = 0; i < 50; ++i) {
       sobel4(frame_gray, grad);
     }
     gettimeofday( & end, NULL);
-
     e = ((double) end.tv_sec * 1000000.0 + (double) end.tv_usec);
     s = ((double) start.tv_sec * 1000000.0 + (double) start.tv_usec);
-    moyenneSobel[4] = (moyenneSobel[4] * n_frames + (e - s) / 50) / (n_frames + 1);
+    mean_sobel[4] = (mean_sobel[4] * n_frames + (e - s) / 50) / (n_frames + 1);
 
     gettimeofday( & start, NULL);
     for (int i = 0; i < 50; ++i) {
       sobel5(frame_gray, grad);
     }
     gettimeofday( & end, NULL);
-
     e = ((double) end.tv_sec * 1000000.0 + (double) end.tv_usec);
     s = ((double) start.tv_sec * 1000000.0 + (double) start.tv_usec);
-    moyenneSobel[5] = (moyenneSobel[5] * n_frames + (e - s) / 50) / (n_frames + 1);
+    mean_sobel[5] = (mean_sobel[5] * n_frames + (e - s) / 50) / (n_frames + 1);
 
     gettimeofday( & start, NULL);
     for (int i = 0; i < 50; ++i) {
-      sobel_unroll(frame_gray, grad);
+      sobel_thread(frame_gray, grad);
     }
     gettimeofday( & end, NULL);
-
     e = ((double) end.tv_sec * 1000000.0 + (double) end.tv_usec);
     s = ((double) start.tv_sec * 1000000.0 + (double) start.tv_usec);
-    moyenneSobel[6] = (moyenneSobel[6] * n_frames + (e - s) / 50) / (n_frames + 1);
+    mean_sobel[6] = (mean_sobel[6] * n_frames + (e - s) / 50) / (n_frames + 1);
     // -------------------------------------------------
     // visualisation
     // taille d'image réduite pour meuilleure disposition sur écran
@@ -732,12 +722,9 @@ int main() {
     imshow("Video gray levels", frame_gray);
     imshow("Video Edge detection", grad);*/
     key = waitKey(5);
+    n_frames++;
   }
-  cout << "Opencv : " << moyenneSobel[0] << endl;
-  cout << "Naif : " << moyenneSobel[3] << endl;
-  cout << "Naif déroulé : " << moyenneSobel[2] << endl;
-  cout << "Pointeurs : " << moyenneSobel[4] << endl;
-  cout << "Pointeurs déroulé i : " << moyenneSobel[5] << endl;
-  cout << "Poiteur déroulés i&j : " << moyenneSobel[1] << endl;
-  cout << "Multithread : " << moyenneSobel[6] << endl;
+  
+  for(int i=0; i<7;i++)
+  	cout << labels[i] << mean_sobel[i] << endl;
 }
