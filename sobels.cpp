@@ -563,16 +563,16 @@ void sobel_task(Mat frame, Mat out, int start, int end) {
  *--------------- Threads ---------------
  *
  */
-void sobel_thread(Mat &f, Mat &out) {
+void sobel_thread(Mat &frame, Mat &out) {
   int n = thread::hardware_concurrency();
   thread* threads[n];
-  int band_width = f.rows / n;
+  int band_width = frame.rows / n;
 
-  threads[0] = new thread(sobel_task_u, f, out, 1, band_width);
+  threads[0] = new thread(sobel_task_u, frame, out, 0, band_width);
   for (int i = 1; i < n - 1; i++) {
-    threads[i] = new thread(sobel_task_u, f, out, i * band_width - 1, (i + 1) * band_width);
+    threads[i] = new thread(sobel_task_u, frame, out, i * band_width - 1, (i + 1) * band_width);
   }
-  threads[n - 1] = new thread(sobel_task_u, f, out, (n - 1) * band_width - 1, f.rows);
+  threads[n - 1] = new thread(sobel_task_u, frame, out, (n - 1) * band_width - 1, frame.rows);
 
   for (thread * t: threads)
     t -> join();
@@ -622,14 +622,14 @@ int main() {
   // Création des fenêtres pour affichage des résultats
   // vous pouvez ne pas les utiliser ou ajouter selon ces exemple
   //
-  // namedWindow("Video input", WINDOW_AUTOSIZE);
-  //namedWindow("Video gray levels", WINDOW_AUTOSIZE);
-  //namedWindow("Video Edge detection", WINDOW_AUTOSIZE);
+   namedWindow("Video input", WINDOW_AUTOSIZE);
+  namedWindow("Video gray levels", WINDOW_AUTOSIZE);
+  namedWindow("Video Edge detection", WINDOW_AUTOSIZE);
   // placement arbitraire des  fenêtre sur écran
   // sinon les fenêtres sont superposée l'une sur l'autre
   // moveWindow("Video input", 10, 30);
-  //moveWindow("Video gray levels", 800, 30);
-  //moveWindow("Video Edge detection", 800, 500);
+  moveWindow("Video gray levels", 800, 30);
+  moveWindow("Video Edge detection", 800, 500);
 
   // --------------------------------------------------
   // boucle infinie pour traiter la séquence vidéo
@@ -649,64 +649,50 @@ int main() {
     cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
     grad = frame_gray.clone();
 
-    gettimeofday( & start, NULL);
-    for (int i = 0; i < 50; ++i) {
-      sobel0(frame_gray, grad);
-    }
+    /*gettimeofday( & start, NULL);
+    for (int i = 0; i < 50; i++) sobel0(frame_gray, grad);
     gettimeofday( & end, NULL);
     e = ((double) end.tv_sec * 1000000.0 + (double) end.tv_usec);
     s = ((double) start.tv_sec * 1000000.0 + (double) start.tv_usec);
     mean_sobel[0] = (mean_sobel[0] * n_frames + (e - s) / 50) / (n_frames + 1);
 
     gettimeofday( & start, NULL);
-    for (int i = 0; i < 50; ++i) {
-      sobel1(frame_gray, grad);
-    }
+    for (int i = 0; i < 50; i++) sobel1(frame_gray, grad);
     gettimeofday( & end, NULL);
     e = ((double) end.tv_sec * 1000000.0 + (double) end.tv_usec);
     s = ((double) start.tv_sec * 1000000.0 + (double) start.tv_usec);
     mean_sobel[1] = (mean_sobel[1] * n_frames + (e - s) / 50) / (n_frames + 1);
 
     gettimeofday( & start, NULL);
-    for (int i = 0; i < 50; ++i) {
-      sobel2(frame_gray, grad);
-    }
+    for (int i = 0; i < 50; i++) sobel2(frame_gray, grad);
     gettimeofday( & end, NULL);
     e = ((double) end.tv_sec * 1000000.0 + (double) end.tv_usec);
     s = ((double) start.tv_sec * 1000000.0 + (double) start.tv_usec);
     mean_sobel[2] = (mean_sobel[2] * n_frames + (e - s) / 50) / (n_frames + 1);
 
     gettimeofday( & start, NULL);
-    for (int i = 0; i < 50; ++i) {
-      sobel3(frame_gray, grad);
-    }
+    for (int i = 0; i < 50; i++) sobel3(frame_gray, grad);
     gettimeofday( & end, NULL);
     e = ((double) end.tv_sec * 1000000.0 + (double) end.tv_usec);
     s = ((double) start.tv_sec * 1000000.0 + (double) start.tv_usec);
     mean_sobel[3] = (mean_sobel[3] * n_frames + (e - s) / 50) / (n_frames + 1);
 
     gettimeofday( & start, NULL);
-    for (int i = 0; i < 50; ++i) {
-      sobel4(frame_gray, grad);
-    }
+    for (int i = 0; i < 50; i++) sobel4(frame_gray, grad);
     gettimeofday( & end, NULL);
     e = ((double) end.tv_sec * 1000000.0 + (double) end.tv_usec);
     s = ((double) start.tv_sec * 1000000.0 + (double) start.tv_usec);
     mean_sobel[4] = (mean_sobel[4] * n_frames + (e - s) / 50) / (n_frames + 1);
 
     gettimeofday( & start, NULL);
-    for (int i = 0; i < 50; ++i) {
-      sobel5(frame_gray, grad);
-    }
+    for (int i = 0; i < 50; i++) sobel5(frame_gray, grad);
     gettimeofday( & end, NULL);
     e = ((double) end.tv_sec * 1000000.0 + (double) end.tv_usec);
     s = ((double) start.tv_sec * 1000000.0 + (double) start.tv_usec);
-    mean_sobel[5] = (mean_sobel[5] * n_frames + (e - s) / 50) / (n_frames + 1);
+    mean_sobel[5] = (mean_sobel[5] * n_frames + (e - s) / 50) / (n_frames + 1);*/
 
     gettimeofday( & start, NULL);
-    for (int i = 0; i < 50; ++i) {
-      sobel_thread(frame_gray, grad);
-    }
+    for (int i = 0; i < 50; i++) sobel_thread(frame_gray, grad);
     gettimeofday( & end, NULL);
     e = ((double) end.tv_sec * 1000000.0 + (double) end.tv_usec);
     s = ((double) start.tv_sec * 1000000.0 + (double) start.tv_usec);
@@ -715,12 +701,12 @@ int main() {
     // visualisation
     // taille d'image réduite pour meuilleure disposition sur écran
 
-    /*resize(frame, frame, Size(), 0.5, 0.5);
+    resize(frame, frame, Size(), 0.5, 0.5);
     resize(frame_gray, frame_gray, Size(), 0.5, 0.5);
     resize(grad, grad, Size(), 1, 1);
     imshow("Video input",frame);
     imshow("Video gray levels", frame_gray);
-    imshow("Video Edge detection", grad);*/
+    imshow("Video Edge detection", grad);
     key = waitKey(5);
     n_frames++;
   }
